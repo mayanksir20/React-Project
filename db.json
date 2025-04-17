@@ -1,0 +1,67 @@
+{
+  "usersProfile": [
+    {
+      "id": "1",
+      "name": "Hedy Lamarr",
+      "age": 40,
+      "email": "hedylam@gmail.com",
+      "occupation": "Actress",
+      "imgUrl": "/src/assets/Images/user-img.jpg"
+    },
+    {
+      "id": "2",
+      "name": "John Doe",
+      "age": 30,
+      "email": "deojhon@gmail.com",
+      "occupation": "Developer",
+      "imgUrl": "/src/assets/Images/user-img.jpg"
+    },
+    {
+      "id": "3",
+      "name": "Jane Doe",
+      "age": 25,
+      "email": "janedeo@gmail.com",
+      "occupation": "Designer",
+      "imgUrl": "/src/assets/Images/user-img.jpg"
+    }
+  ],
+  "users": [
+    {
+      "id": "82db",
+      "email": "admin@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "e6b5",
+      "email": "mayanksir20@gmail.com",
+      "password": "Mayanksir20@"
+    },
+    {
+      "id": "bde3",
+      "email": "abc@gmail.com",
+      "password": "123456"
+    }
+  ],
+  "person": [
+    [
+      {
+        "id": "1",
+        "name": "Hedy Lamarr"
+      },
+      {
+        "id": "2",
+        "name": "John Doe"
+      }
+    ],
+    [
+      {
+        "id": "3",
+        "name": "Jane Doe"
+      },
+      {
+        "id": "4",
+        "name": "John Smith"
+      }
+    ]
+  ]
+}

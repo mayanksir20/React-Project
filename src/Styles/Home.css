@@ -1,0 +1,25 @@
+
+.card {
+  background-color: #d4e1f3 !important;
+  border: none !important;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px !important;
+  .user-info {
+    position: relative;
+    background-color: #d9acfb47;
+    margin-left: 15px;
+    padding: 5px 10px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-bottom: 2px solid #9f96fa;
+    border-radius: 5px;
+    width: 100%;
+    overflow: hidden;
+
+    p {
+      margin: 0;
+      padding: 0;
+    }
+  }
+  img {
+    border-radius: 5px;
+  }
+}
