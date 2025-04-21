@@ -27,18 +27,10 @@
   ],
   "users": [
     {
-      "id": "82db",
+      "id": "002f",
+      "fName": "Admin",
+      "lName": "admin",
       "email": "admin@gmail.com",
-      "password": "123456"
-    },
-    {
-      "id": "e6b5",
-      "email": "mayanksir20@gmail.com",
-      "password": "Mayanksir20@"
-    },
-    {
-      "id": "bde3",
-      "email": "abc@gmail.com",
       "password": "123456"
     }
   ],

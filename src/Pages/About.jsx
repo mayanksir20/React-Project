@@ -16,8 +16,6 @@ const About = () => {
   // }
   //   , []);
 
-
-
   const [person, setPerson] = useState([]);
 
   useEffect(() => {

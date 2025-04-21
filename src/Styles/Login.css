@@ -7,7 +7,7 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .login-container {
@@ -37,23 +37,6 @@ body {
   width: 100%;
   padding: 40px;
   transition: all 0.5s ease;
-}
-
-@media (min-width: 768px) {
-  .left,
-  .right {
-    width: 50%;
-    position: relative;
-  }
-
-  .login-container.register-mode .left {
-    transform: translateX(100%);
-    border-radius: 0 30px 30px 0;
-  }
-
-  .login-container.register-mode .right {
-    transform: translateX(-100%);
-  }
 }
 
 .left {
@@ -185,11 +168,31 @@ body {
   color: #fff;
   border-color: #7494ec;
 }
+@media (min-width: 768px) {
+  .left,
+  .right {
+    width: 50%;
+    position: relative;
+  }
+
+  .login-container.register-mode .left {
+    transform: translateX(100%);
+    border-radius: 0 30px 30px 0;
+  }
+
+  .login-container.register-mode .right {
+    transform: translateX(-100%);
+  }
+  .popup-content {
+    width: 50%;
+  }
+}
 
 @media (max-width: 767px) {
   .left,
   .right {
     width: 100%;
+    padding: 12px;
     transform: none !important;
   }
 
@@ -218,8 +221,34 @@ body {
   padding: 20px;
   border-radius: 10px;
   text-align: center;
+  position: relative;
+
+  .close-icon {
+    font-size: 25px;
+    line-height: 10px;
+    position: absolute;
+    right: 10px;
+    font-weight: 300;
+    top: 8px;
+  }
 }
 
 .popup-content button {
   margin-top: 10px;
+}
+/* ---------register-form--- */
+.name-inputs {
+  display: flex;
+  gap: 1rem;
+}
+
+.name-inputs input {
+  flex: 1;
+}
+
+/* Mobile responsive: stack inputs vertically on small screens */
+@media (max-width: 600px) {
+  .name-inputs {
+    flex-direction: column;
+  }
 }

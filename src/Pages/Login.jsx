@@ -1,135 +1,237 @@
-import { useState } from "react"; // useState hook ko import kar rahe hain React se to handle the state of the component
-import { useNavigate } from "react-router-dom"; // useNavigate hook ko import kar rahe hain to navigate between pages
-import "../styles/Login.css"; // CSS file ko import kar rahe hain for styling
+import { useState } from "react"; // Import React's useState hook to manage state
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook for routing to other pages
+import "../styles/Login.css"; // Import custom styles for login page
 
 const Login = () => {
-  const navigate = useNavigate(); // useNavigate hook ka use kar rahe hain to navigate to other pages
-  const [isRegister, setIsRegister] = useState(false); // A boolean state to toggle between register and login mode
-  const [email, setEmail] = useState(""); // Email field ka state
-  const [password, setPassword] = useState(""); // Password field ka state
-  const [confirmPassword, setConfirmPassword] = useState(""); // Confirm Password field (only for register mode)
-  const [error, setError] = useState(""); // Error state to display error messages to the user
-  const [showPopup, setShowPopup] = useState(false); // Popup show/hide ka state to display registration success message
+  const navigate = useNavigate(); // Initialize navigate function to programmatically navigate to other pages
 
-  const handleSubmit = async (e) => { // handleSubmit function jo form ke submit hone pe call hota hai
-    e.preventDefault(); // Page reload hone se rokne ke liye
+  // ----------- States -----------
+  const [isRegister, setIsRegister] = useState(false); // State to toggle between login and registration modes
+  const [email, setEmail] = useState(""); // State for storing user email input
+  const [password, setPassword] = useState(""); // State for storing user password input
+  const [confirmPassword, setConfirmPassword] = useState(""); // State for storing confirm password (only for registration)
+  const [error, setError] = useState(""); // State to store and display error messages
+  const [fName, setfName] = useState(""); // State for storing user email input
+  const [lName, setlName] = useState(""); // State for storing user email input
+  // State for the pop-up window that appears after registration
+  const [showPopup, setShowPopup] = useState(false);
 
-    if (isRegister) { // Agar registration mode hai
-      if (!email || !password || !confirmPassword) { // Agar kisi bhi field ka data nahi hai
-        return setError("All fields are required."); // Error show karo
+  // ----------- Forgot password pop-up ---------
+  const [showForgotPopup, setShowForgotPopup] = useState(false); // State to show/hide forgot password pop-up
+  const [resetEmail, setResetEmail] = useState(""); // State to store email input for password reset
+  const [resetPassword, setResetPassword] = useState(""); // State to store new password for password reset
+  const [resetConfirmPassword, setResetConfirmPassword] = useState(""); // State to store confirm password for reset
+  const [resetMessage, setResetMessage] = useState(""); // State to show success/error messages for password reset
+
+  // Toggle visibility of password field (show/hide password)
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClick = () => setShowPassword(!showPassword); // Toggle password visibility
+
+  // ----------- Form submission handler ---------
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior (page reload)
+
+    setError(""); // Reset any previous errors
+
+    // Handle registration flow
+    if (isRegister) {
+      if (!fName || !lName || !email || !password || !confirmPassword) {
+        return setError("All fields are required."); // Ensure that all fields are filled
       }
 
-      if (password !== confirmPassword) { // Agar password aur confirm password match nahi karte
-        return setError("Passwords do not match."); // Error show karo
+      if (password !== confirmPassword) {
+        return setError("Passwords do not match."); // Ensure passwords match
       }
 
-      const checkRes = await fetch(`http://localhost:3001/users?email=${email}`); // Backend se check karo ki email already registered hai ya nahi
-      const existingUser = await checkRes.json(); // Response ko json mein convert karo
+      // Check if the user already exists by matching email
+      const checkRes = await fetch(`http://localhost:3001/users?email=${email}`);
+      const existingUser = await checkRes.json();
 
-      if (existingUser.length > 0) { // Agar user already registered hai
-        return setError("Email already registered."); // Error show karo
+      if (existingUser.length > 0) {
+        return setError("Email already registered."); // Show error if email already exists
       }
 
-      // Agar sab kuch thik hai, toh user ko register karo
+      // Send POST request to register the new user
       await fetch("http://localhost:3001/users", {
-        method: "POST", // POST request bhej rahe hain data ko server pe save karne ke liye
-        headers: {
-          "Content-Type": "application/json", // Data ko JSON format mein bhej rahe hain
-        },
-        body: JSON.stringify({ email, password }), // Body mein email aur password ko send kar rahe hain
+        method: "POST", // Using POST to save the user
+        headers: { "Content-Type": "application/json" }, // Set content type to JSON
+        body: JSON.stringify({fName, lName, email, password }), // Send email and password to the backend
       });
 
-      setShowPopup(true); // Popup ko show karne ke liye state set kar rahe hain
-    } else { // Agar login mode hai
-      const res = await fetch(`http://localhost:3001/users?email=${email}&password=${password}`); // Backend pe login check kar rahe hain
-      const data = await res.json(); // Response ko json mein convert karo
+      setShowPopup(true); // Show the success pop-up after registration
+    } else {
+      // Handle login flow
+      const res = await fetch(`http://localhost:3001/users?email=${email}&password=${password}`);
+      const data = await res.json();
 
-      if (data.length > 0) { // Agar email aur password match karte hain
-        localStorage.setItem("auth", true); // User ko authenticated mark karne ke liye localStorage mein set kar rahe hain
-        navigate("/"); // Dashboard ya home page pe navigate kar rahe hain
+      if (data.length > 0) {
+        localStorage.setItem("auth", true); // Set user authentication status in localStorage
+        localStorage.setItem("userEmail", data[0].email); // 👈 Store the user email
+        localStorage.setItem("First Name", data[0].fName); // 👈 Store the First Name
+        localStorage.setItem("Last Name", data[0].lName); // 👈 Store the Last Name
+        navigate("/"); // Redirect to the home page/dashboard after successful login
       } else {
-        setError("Invalid email or password"); // Agar email ya password galat hai toh error show karo
+        setError("Invalid email or password"); // Show error if email or password is incorrect
       }
     }
   };
 
+  // ----------- Forgot password handler -----------
+  const handleResetPassword = async (e) => {
+    e.preventDefault(); // Prevent default form behavior
+
+    // Validation check for empty fields
+    if (!resetEmail || !resetPassword || !resetConfirmPassword) {
+      return setResetMessage("Please fill all fields"); // Show message if fields are empty
+    }
+
+    // Ensure new password and confirm password match
+    if (resetPassword !== resetConfirmPassword) {
+      return setResetMessage("Passwords do not match"); // Show message if passwords don't match
+    }
+
+    try {
+      // Fetch the user from the backend using email
+      const res = await fetch(`http://localhost:3001/users?email=${resetEmail}`);
+      const users = await res.json();
+
+      if (users.length === 0) {
+        return setResetMessage("Email not found"); // Show message if email doesn't exist
+      }
+
+      const user = users[0];
+
+      // Send PATCH request to update the password for the user
+      await fetch(`http://localhost:3001/users/${user.id}`, {
+        method: "PATCH", // Use PATCH to update an existing resource
+        headers: { "Content-Type": "application/json" }, // Set content type to JSON
+        body: JSON.stringify({ password: resetPassword }), // Update the user's password
+      });
+
+      setResetMessage("Password updated successfully!"); // Success message after password update
+      setResetEmail(""); // Clear email field
+      setResetPassword(""); // Clear new password field
+      setResetConfirmPassword(""); // Clear confirm password field
+
+      // Close the pop-up after 1.5 seconds
+      setTimeout(() => {
+        setShowForgotPopup(false);
+        setResetMessage(""); // Clear reset message
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      setResetMessage("Something went wrong"); // Show error message in case of failure
+    }
+  };
+
+  // ----------- After registration success, navigate to login page -----------
   const handleLoginNow = () => {
-    setShowPopup(false); // Hide the popup
+    setShowPopup(false); // Close the registration success pop-up
     setIsRegister(false); // Switch to login mode
   };
 
+
+
+
+
+
   return (
-    <div className={`login-container ${isRegister ? "register-mode" : ""}`}> {/* Conditional class add kar rahe hain based on register mode */}
-      <div className="login_form">
-        {/* Blue panel */}
-        <div className="left">
-          <div>
-            <p>{isRegister ? "Welcome, Dear User!" : "Hello, Dear User!"}</p> {/* Dynamic message based on register mode */}
-            <a href="#">
-              {isRegister
-                ? "Already have an account?" // Agar register mode hai toh yeh show hoga
-                : "Don't have an account?"} {/* Agar login mode hai toh yeh show hoga */}
-            </a><br />
-            <input className="mt-2"
-              type="button"
-              value={isRegister ? "Login" : "Register"} // Button ka label dynamically change ho raha hai
-              onClick={() => {
-                setError(""); // Error ko clear kar rahe hain jab toggle kar rahe hain
-                setIsRegister(!isRegister); // Register/Login toggle kar rahe hain
-              }}
-            />
+    <>
+      {/* Login/Register container (it changes based on isRegister state) */}
+      <div className={`login-container ${isRegister ? "register-mode" : ""}`}>
+        <div className="login_form">
+          {/* Left panel (description and toggle button for switching between login/register) */}
+          <div className="left">
+            <div>
+              <p>{isRegister ? "Welcome, Dear User!" : "Hello, Dear User!"}</p>
+              <a href="#">{isRegister ? "Already have an account?" : "Don't have an account?"}</a><br />
+              <input
+                className="mt-2"
+                type="button"
+                value={isRegister ? "Login" : "Register"} // Toggle button between login and register
+                onClick={() => {
+                  setError(""); // Clear error when switching between modes
+                  setIsRegister(!isRegister); // Toggle the mode
+                }}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Form panel */}
-        <div className="right">
-          <div>
-            <h1>{isRegister ? "Register" : "Login"}</h1> {/* Dynamic heading based on mode */}
-
+          {/* Right panel (form for login or registration) */}
+          <div className="right">
+            <h1>{isRegister ? "Register" : "Login"}</h1>
             <form onSubmit={handleSubmit}>
+
+              {isRegister && (
+                <div className="input-wrapper name-inputs">
+                  <input
+                    type="text"
+                    placeholder="First Name"
+                    value={fName}
+                    onChange={(e) => setfName(e.target.value)}
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Last Name"
+                    value={lName}
+                    onChange={(e) => setlName(e.target.value)}
+                    
+                  />
+                </div>
+              )}
+
+              {/* Email input field */}
               <div className="input-wrapper">
                 <input
                   type="email"
                   placeholder="Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)} // Email field ko handle kar rahe hain
+                  onChange={(e) => setEmail(e.target.value)} // Update email state on change
                   required
                 />
-                <i className="fa-solid fa-user input-icon"></i>
+                <i className="fa-solid fa-user input-icon"></i> {/* Icon for email field */}
               </div>
 
+              {/* Password input field */}
               <div className="input-wrapper">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Toggle between password visibility
                   placeholder="Password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)} // Password field ko handle kar rahe hain
+                  onChange={(e) => setPassword(e.target.value)} // Update password state on change
                   required
                 />
-                <i className="fa-solid fa-lock input-icon"></i>
+                <i onClick={handleClick} className={`fa-solid ${showPassword ? "fa-lock-open" : "fa-lock"} input-icon`}></i> {/* Toggle password visibility icon */}
               </div>
 
-              {isRegister && ( // Agar register mode hai toh confirm password field bhi show hoga
+              {/* Confirm password input (only shown in register mode) */}
+              {isRegister && (
                 <div className="input-wrapper">
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Confirm Password"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)} // Confirm password field ko handle kar rahe hain
+                    onChange={(e) => setConfirmPassword(e.target.value)} // Update confirm password state
                     required
                   />
-                  <i className="fa-solid fa-lock input-icon"></i>
+                  <i onClick={handleClick} className={`fa-solid ${showPassword ? "fa-lock-open" : "fa-lock"} input-icon`}></i>
                 </div>
               )}
 
-              {!isRegister && <a href="#">Forgot Password?</a>} {/* Agar login mode hai toh forgot password ka link show hoga */}
+              {/* Forgot password link (only shown in login mode) */}
+              {!isRegister && (
+                <a className="forgot-password-link mb-2" onClick={() => setShowForgotPopup(true)}>
+                  Forgot Password?
+                </a>
+              )}
 
-              <button type="submit">{isRegister ? "Register" : "Login"}</button> {/* Button ka text dynamically change ho raha hai */}
-              {error && <p style={{ color: "red" }}>{error}</p>} {/* Agar error hai toh red text mein show hoga */}
+              {/* Submit button */}
+              <button type="submit">{isRegister ? "Register" : "Login"}</button>
+              {error && <p style={{ color: "red" }}>{error}</p>} {/* Display error messages */}
 
-              <p>
-                or {isRegister ? "register" : "login"} with social platforms
-              </p>
+              {/* Social login links */}
+              <p>or {isRegister ? "register" : "login"} with social platforms</p>
               <div className="social-icons">
                 <a href="#"><i className="fa-brands fa-google"></i></a>
                 <a href="#"><i className="fa-brands fa-facebook-f"></i></a>
@@ -141,18 +243,68 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Popup after successful registration */}
+      {/* ----------- Registration success popup ----------- */}
       {showPopup && (
-        <div className="popup">
+        <div className="popup right">
           <div className="popup-content">
-            <p>Welcome! You are now a registered user.</p>
-            <p>Email: {email}</p>
-            <p>Password: {password}</p>
-            <button onClick={handleLoginNow}>Login Now</button> {/* Login page pe redirect kar rahe hain */}
+            <button
+              onClick={() => setShowPopup(false)} // Close pop-up when clicked
+              style={{ float: "right", cursor: "pointer", background: "none", border: "none" }}
+            >
+              ✖
+            </button>
+            <p>✅ Registration Successful!</p>
+            <div className="input-wrapper">
+              Email: <input type="email" value={email} readOnly />
+            </div>
+            <div className="input-wrapper">
+              Password: <input type="text" value={password} readOnly />
+            </div>
+            <button onClick={handleLoginNow}>Login Now</button> {/* Redirect to login */}
           </div>
         </div>
       )}
-    </div>
+
+      {/* ----------- Forgot password popup ----------- */}
+      {showForgotPopup && (
+        <div className="popup right">
+          <div className="popup-content">
+            <a className="close-icon" onClick={() => setShowForgotPopup(false)}>
+              <i className="fa-solid fa-xmark"></i>
+            </a>
+            <h3>Reset Password</h3>
+            <form onSubmit={handleResetPassword}>
+              <div className="input-wrapper">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)} // Update reset email state
+                />
+              </div>
+              <div className="input-wrapper">
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)} // Update reset password state
+                />
+              </div>
+              <div className="input-wrapper">
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)} // Update reset confirm password state
+                />
+              </div>
+              <button type="submit">Reset Password</button> {/* Submit password reset */}
+              {resetMessage && <p>{resetMessage}</p>} {/* Show reset message */}
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

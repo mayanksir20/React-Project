@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import "../Styles/Header.css";
@@ -6,10 +6,20 @@ import "../Styles/Header.css";
 const Header = () => {
 
   const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState("")
 
-  const hendaleLogout = () =>{
+  useEffect(() => {
+    const email = localStorage.getItem("userEmail");
+    if (email) {
+      setUserEmail(email)
+    }
+  }, [])
+
+  const hendaleLogout = () => {
     localStorage.removeItem('isLoggedIn');
-    navigate ("/login")
+    localStorage.removeItem("auth");
+    localStorage.removeItem("userEmail");
+    navigate("/login")
   }
 
   return (
@@ -50,12 +60,14 @@ const Header = () => {
               <li className="nav-item"><Link className="nav-link" to="/contact">Contact</Link></li>
             </ul>
             <div className="user ">
-              {/* // Header.jsx or wherever: */}
-              <button onClick={hendaleLogout}>Logout</button>
-
+              
+              <span>{userEmail}</span> 
+            
+            
             </div>
+            <button onClick={hendaleLogout}>Logout</button>
           </div>
-        </div> 
+        </div>
       </nav>
     </div>
   );
